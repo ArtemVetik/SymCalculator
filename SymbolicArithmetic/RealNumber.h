@@ -20,13 +20,13 @@ namespace SymbolArithmetic {
     public:
         explicit RealNumber(const std::string& number);
 
-        virtual std::string ToString();
-
-        friend RealNumber operator+(const RealNumber &number1, const RealNumber &number2);
-
-        friend RealNumber operator-(const RealNumber &number1, const RealNumber &number2);
+        friend std::ostream& operator<< (std::ostream &out, const RealNumber &number);
         friend RealNumber operator-(const RealNumber &number);
 
+        friend RealNumber operator+(const RealNumber &number1, const RealNumber &number2);
+        friend RealNumber operator-(const RealNumber &number1, const RealNumber &number2);
+        friend RealNumber operator*(const RealNumber &number1, const RealNumber &number2);
+        
         friend bool operator>=(const RealNumber &number1, const RealNumber &number2);
 
         static RealNumber Abs(const RealNumber &number);

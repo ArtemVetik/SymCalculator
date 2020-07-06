@@ -9,9 +9,21 @@ SymbolArithmetic::RealNumber::RealNumber(const std::string& number) : sign(Sign:
     if (fractionalPart.empty()) fractionalPart = "0";
 }
 
-std::string SymbolArithmetic::RealNumber::ToString() {
-    return std::string(1,sign) + wholePart + "." + fractionalPart;
+std::ostream &SymbolArithmetic::operator<<(std::ostream &out, const SymbolArithmetic::RealNumber &number) {
+    if (number.sign != Sign::Plus)
+        out << std::string(1, number.sign);
+    out << number.wholePart;
+    if (number.fractionalPart != "0")
+        out << std::string(".") << number.fractionalPart;
 
+    return out;
+}
+
+SymbolArithmetic::RealNumber SymbolArithmetic::operator-(const SymbolArithmetic::RealNumber &number) {
+    if (number.sign == Sign::Plus)
+        return RealNumber("-" + number.wholePart + "." + number.fractionalPart);
+    else
+        return RealNumber("+" + number.wholePart + "." + number.fractionalPart);
 }
 
 void SymbolArithmetic::RealNumber::SplitNumber(const std::string &number) {
@@ -72,13 +84,6 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator-(const SymbolArithmetic:
     return RealNumber((firstBigger ? "+" : "-") + sub.substr(0,  dotPos) + "." + sub.substr(dotPos, std::string::npos));
 }
 
-SymbolArithmetic::RealNumber SymbolArithmetic::operator-(const SymbolArithmetic::RealNumber &number) {
-    if (number.sign == Sign::Plus)
-        return RealNumber("-" + number.wholePart + "." + number.fractionalPart);
-    else
-        return RealNumber("+" + number.wholePart + "." + number.fractionalPart);
-}
-
 bool SymbolArithmetic::operator>=(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
     int compValue = number1.wholePart.compare(number2.wholePart);
     if (compValue != 0)
@@ -93,4 +98,17 @@ bool SymbolArithmetic::operator>=(const SymbolArithmetic::RealNumber &number1, c
 
 SymbolArithmetic::RealNumber SymbolArithmetic::RealNumber::Abs(const RealNumber &number) {
     return RealNumber(number.wholePart + "." + number.fractionalPart);
+}
+
+SymbolArithmetic::RealNumber SymbolArithmetic::operator*(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
+    Sign resultSign = (number1.sign == number2.sign) ? Sign::Plus : Sign::Minus;
+
+    std::string firstNumber = number1.wholePart + number1.fractionalPart;
+    std::string secondNumber = number2.wholePart + number2.fractionalPart;
+
+    unsigned int dotPosRight = number1.fractionalPart.size() + number2.fractionalPart.size();
+
+    std::string result = Detail::SymbolOperation::Mul(firstNumber, secondNumber);
+    return RealNumber(std::string(1, resultSign) + result.substr(0, result.size()-dotPosRight) + "." +
+                                                    result.substr(result.size()-dotPosRight, std::string::npos));
 }

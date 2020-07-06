@@ -18,6 +18,7 @@ namespace SymbolArithmetic {
             /// @brief Вычитание целых чисел
             /// @note Первое чило должно быть больше второго, иначе функция отработает с ошибкой
             static std::string Sub(const std::string &first, const std::string &second);
+            static std::string Mul(const std::string &first, const std::string &second);
         };
 
         template<typename... T>

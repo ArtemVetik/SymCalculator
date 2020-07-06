@@ -14,7 +14,7 @@ std::string SymbolArithmetic::Detail::SymbolOperation::Add(const std::vector<std
     result.resize(maxSize);
     resultPosition = result.end();
 
-    unsigned char sum, mod = 0;
+    unsigned int sum, mod = 0;
     bool hasSymbols;
     while (true) {
         sum = mod;
@@ -61,4 +61,25 @@ std::string SymbolArithmetic::Detail::SymbolOperation::Sub(const std::string &fi
     }
 
     return result;
+}
+
+std::string SymbolArithmetic::Detail::SymbolOperation::Mul(const std::string &first, const std::string &second) {
+    std::vector<std::string> templateMults;
+
+    int mul, mod;
+    for (auto secondNumber = second.crbegin(); secondNumber != second.crend(); ++secondNumber) {
+        mod = 0;
+        templateMults.emplace_back(std::string());
+        for (auto firstNumber = first.crbegin(); firstNumber != first.crend(); ++firstNumber) {
+            mul = (*firstNumber - '0') * (*secondNumber - '0') + mod;
+            mod = mul / 10;
+            mul %= 10;
+            templateMults.back().insert(0, std::to_string(mul));
+        }
+        if (mod != 0)
+            templateMults.back().insert(0, std::to_string(mod));
+        templateMults.back() += std::string(templateMults.size()-1,'0');
+    }
+
+    return Add(templateMults);
 }
