@@ -4,6 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include "StringOperation.h"
 
 namespace SymbolArithmetic {
     namespace Detail {
@@ -18,7 +19,11 @@ namespace SymbolArithmetic {
             /// @brief Вычитание целых чисел
             /// @note Первое чило должно быть больше второго, иначе функция отработает с ошибкой
             static std::string Sub(const std::string &first, const std::string &second);
+            /// @brief Умножение целых чисел
             static std::string Mul(const std::string &first, const std::string &second);
+            ///@brief Деление целых чисел
+            /// @return Пара часть от деления и остаток
+            static std::pair<std::string,std::string> Div(const std::string &first, const std::string &second);
         };
 
         template<typename... T>

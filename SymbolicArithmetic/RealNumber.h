@@ -26,7 +26,8 @@ namespace SymbolArithmetic {
         friend RealNumber operator+(const RealNumber &number1, const RealNumber &number2);
         friend RealNumber operator-(const RealNumber &number1, const RealNumber &number2);
         friend RealNumber operator*(const RealNumber &number1, const RealNumber &number2);
-        
+        friend RealNumber operator/(const RealNumber &number1, const RealNumber &number2);
+
         friend bool operator>=(const RealNumber &number1, const RealNumber &number2);
 
         static RealNumber Abs(const RealNumber &number);

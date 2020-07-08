@@ -83,3 +83,38 @@ std::string SymbolArithmetic::Detail::SymbolOperation::Mul(const std::string &fi
 
     return Add(templateMults);
 }
+
+std::pair<std::string,std::string> SymbolArithmetic::Detail::SymbolOperation::Div(const std::string &first, const std::string &second) {
+    std::vector<std::string> buffer;
+    buffer.reserve(10);
+    buffer.emplace_back("0");
+    buffer.emplace_back(second);
+    for (int i = 2; i < 10; ++i)
+        buffer.emplace_back(Mul(std::to_string(i), second));
+
+    unsigned int lastPos = 0;
+    int div = 0;
+    std::string result;
+    std::string tempDiv;
+    std::string mod;
+    while (lastPos < first.size()) {
+        tempDiv = StringOperation::GetBiggerOrEqualSubstringLeft(mod + first.substr(lastPos, std::string::npos), second);
+        lastPos += tempDiv.size() - mod.size();
+        result += std::string(tempDiv.size() - mod.size() - 1,'0');
+
+        StringOperation::RemoveZerosLeft(tempDiv);
+        if (tempDiv.empty())
+            tempDiv = "0";
+        for (div = 0; div < buffer.size(); ++div) {
+            if (tempDiv.size() == buffer[div].size() && tempDiv.compare(buffer[div]) < 0 || tempDiv.size() < buffer[div].size())
+                break;
+        }
+        div--;
+
+        result += std::to_string(div);
+        mod = Sub(tempDiv, buffer[div]);
+        StringOperation::RemoveZerosLeft(mod);
+    }
+
+    return std::make_pair(result, mod);
+}
