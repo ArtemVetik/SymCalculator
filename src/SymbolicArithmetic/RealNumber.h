@@ -20,6 +20,7 @@ namespace SymbolArithmetic {
     public:
         explicit RealNumber(const std::string& number);
 
+        std::string ToString();
         friend std::ostream& operator<< (std::ostream &out, const RealNumber &number);
         friend RealNumber operator-(const RealNumber &number);
 
@@ -31,6 +32,7 @@ namespace SymbolArithmetic {
         friend bool operator>=(const RealNumber &number1, const RealNumber &number2);
 
         static RealNumber Abs(const RealNumber &number);
+
     };
 }
 

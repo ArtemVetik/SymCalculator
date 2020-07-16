@@ -9,6 +9,11 @@ SymbolArithmetic::RealNumber::RealNumber(const std::string& number) : sign(Sign:
     if (fractionalPart.empty()) fractionalPart = "0";
 }
 
+std::string SymbolArithmetic::RealNumber::ToString() {
+    std::string signString = (sign != Sign::Plus) ? std::string(1,sign) : "";
+    return signString + wholePart + "." + fractionalPart;
+}
+
 std::ostream &SymbolArithmetic::operator<<(std::ostream &out, const SymbolArithmetic::RealNumber &number) {
     if (number.sign != Sign::Plus)
         out << std::string(1, number.sign);
@@ -48,7 +53,7 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator+(const SymbolArithmetic:
         else
             return number2 - RealNumber::Abs(number1);
     }
-
+    
     std::string newFractionalPart;
     std::string fractionalOverflow;
     std::string firstFraction = number1.fractionalPart;
@@ -118,6 +123,9 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator/(const SymbolArithmetic:
 }
 
 bool SymbolArithmetic::operator>=(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
+    if (number1.wholePart.size() != number2.wholePart.size())
+        return number1.wholePart.size() > number2.wholePart.size();
+
     int compValue = number1.wholePart.compare(number2.wholePart);
     if (compValue != 0)
         return compValue > 0;
