@@ -2,11 +2,22 @@
 
 SymbolArithmetic::RealNumber::RealNumber(const std::string& number) : sign(Sign::Plus) {
     SplitNumber(number);
+
     Detail::StringOperation::RemoveZerosLeft(wholePart);
     Detail::StringOperation::RemoveZerosRight(fractionalPart);
-
     if (wholePart.empty()) wholePart = "0";
     if (fractionalPart.empty()) fractionalPart = "0";
+}
+
+SymbolArithmetic::RealNumber::RealNumber(const Sign &sign, const std::string &wholePart, const std::string &fractionalPart) {
+    this->sign = sign;
+    this->wholePart = wholePart;
+    this->fractionalPart = fractionalPart;
+
+    Detail::StringOperation::RemoveZerosLeft(this->wholePart);
+    Detail::StringOperation::RemoveZerosRight(this->fractionalPart);
+    if (this->wholePart.empty()) this->wholePart = "0";
+    if (this->fractionalPart.empty()) this->fractionalPart = "0";
 }
 
 std::string SymbolArithmetic::RealNumber::ToString() {
@@ -56,9 +67,9 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator+(const SymbolArithmetic:
     
     std::string newFractionalPart;
     std::string fractionalOverflow;
+
     std::string firstFraction = number1.fractionalPart;
     std::string secondFraction = number2.fractionalPart;
-
     Detail::StringOperation::EqualizeLengthRight(firstFraction, secondFraction);
     newFractionalPart = Detail::SymbolOperation::Add(firstFraction, secondFraction);
 
@@ -68,7 +79,7 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator+(const SymbolArithmetic:
     }
     std::string newWholePart = Detail::SymbolOperation::Add(number1.wholePart, number2.wholePart, fractionalOverflow);
 
-    return RealNumber(std::string(1, number1.sign) + newWholePart + "." + newFractionalPart);
+    return RealNumber(number1.sign, newWholePart,  newFractionalPart);
 }
 
 SymbolArithmetic::RealNumber SymbolArithmetic::operator-(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
@@ -86,7 +97,7 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator-(const SymbolArithmetic:
 
     std::string sub = Detail::SymbolOperation::Sub(bigger.wholePart + bigger.fractionalPart, less.wholePart + less.fractionalPart);
 
-    return RealNumber((firstBigger ? "+" : "-") + sub.substr(0,  dotPos) + "." + sub.substr(dotPos, std::string::npos));
+    return RealNumber((firstBigger ? Sign::Plus : Sign::Minus), sub.substr(0,  dotPos), sub.substr(dotPos, std::string::npos));
 }
 
 SymbolArithmetic::RealNumber SymbolArithmetic::operator*(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
@@ -98,8 +109,7 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator*(const SymbolArithmetic:
     unsigned int dotPosRight = number1.fractionalPart.size() + number2.fractionalPart.size();
 
     std::string result = Detail::SymbolOperation::Mul(firstNumber, secondNumber);
-    return RealNumber(std::string(1, resultSign) + result.substr(0, result.size()-dotPosRight) + "." +
-                      result.substr(result.size()-dotPosRight, std::string::npos));
+    return RealNumber(resultSign, result.substr(0, result.size()-dotPosRight), result.substr(result.size()-dotPosRight, std::string::npos));
 }
 
 SymbolArithmetic::RealNumber SymbolArithmetic::operator/(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
@@ -117,9 +127,9 @@ SymbolArithmetic::RealNumber SymbolArithmetic::operator/(const SymbolArithmetic:
     auto result = Detail::SymbolOperation::Div(first, second);
     if (result.first.size() < eps) result.first.insert(0, std::string(eps - result.first.size(),'0'));
 
-    std::string sign = number1.sign == number2.sign ? std::string(1, Sign::Plus) : std::string(1,Sign::Minus);
+    Sign sign = number1.sign == number2.sign ? Sign::Plus : Sign::Minus;
     unsigned int dotPos = result.first.size() - eps;
-    return RealNumber(sign + result.first.substr(0,dotPos) + "." + result.first.substr(dotPos, std::string::npos));
+    return RealNumber(sign, result.first.substr(0,dotPos), result.first.substr(dotPos, std::string::npos));
 }
 
 bool SymbolArithmetic::operator>=(const SymbolArithmetic::RealNumber &number1, const SymbolArithmetic::RealNumber &number2) {
@@ -138,5 +148,5 @@ bool SymbolArithmetic::operator>=(const SymbolArithmetic::RealNumber &number1, c
 }
 
 SymbolArithmetic::RealNumber SymbolArithmetic::RealNumber::Abs(const RealNumber &number) {
-    return RealNumber(number.wholePart + "." + number.fractionalPart);
+    return RealNumber(Sign::Plus, number.wholePart, number.fractionalPart);
 }

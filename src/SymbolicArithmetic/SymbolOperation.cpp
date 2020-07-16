@@ -41,6 +41,37 @@ std::string SymbolArithmetic::Detail::SymbolOperation::Add(const std::vector<std
     return result;
 }
 
+void SymbolArithmetic::Detail::SymbolOperation::FastFourierTransform(std::vector<std::complex<double>> &coefficients, bool invert) {
+    unsigned int coefSize = coefficients.size();
+
+    for (unsigned int i = 1, j = 0; i < coefSize; ++i) {
+        unsigned int bit = coefSize >> 1u;
+        for (; j>=bit; bit >>= 1u)
+            j -= bit;
+        j += bit;
+        if (i < j)
+            swap(coefficients[i], coefficients[j]);
+    }
+
+    for (unsigned int length = 2; length <= coefSize; length <<= 1u) {
+        double ang = 2 * M_PI / length * (invert ? -1 : 1);
+        std::complex<double> wLength (cos(ang), sin(ang));
+        for (unsigned int i = 0; i < coefSize; i += length) {
+            std::complex<double> w(1);
+            for (int j = 0; j < length / 2; ++j) {
+                std::complex<double> firstPart = coefficients[i + j];
+                std::complex<double> secondPart = coefficients[i + j + length / 2] * w;
+                coefficients[i+j] = firstPart + secondPart;
+                coefficients[i + j + length / 2] = firstPart - secondPart;
+                w *= wLength;
+            }
+        }
+    }
+    if (invert)
+        for (int i = 0; i < coefSize; ++i)
+            coefficients[i] /= coefSize;
+}
+
 std::string SymbolArithmetic::Detail::SymbolOperation::Sub(const std::string &first, const std::string &second) {
     std::string result = first;
     auto firstPosition = result.end();
@@ -64,24 +95,40 @@ std::string SymbolArithmetic::Detail::SymbolOperation::Sub(const std::string &fi
 }
 
 std::string SymbolArithmetic::Detail::SymbolOperation::Mul(const std::string &first, const std::string &second) {
-    std::vector<std::string> templateMults;
+    std::string result;
 
-    int mul, mod;
-    for (auto secondNumber = second.crbegin(); secondNumber != second.crend(); ++secondNumber) {
-        mod = 0;
-        templateMults.emplace_back(std::string());
-        for (auto firstNumber = first.crbegin(); firstNumber != first.crend(); ++firstNumber) {
-            mul = (*firstNumber - '0') * (*secondNumber - '0') + mod;
-            mod = mul / 10;
-            mul %= 10;
-            templateMults.back().insert(0, std::to_string(mul));
-        }
-        if (mod != 0)
-            templateMults.back().insert(0, std::to_string(mod));
-        templateMults.back() += std::string(templateMults.size()-1,'0');
+    std::vector<std::complex<double>> dftA,  dftB;
+    for (const auto elem : first)
+        dftA.emplace_back(elem - '0');
+    for (const auto elem : second)
+        dftB.emplace_back(elem - '0');
+
+    unsigned int size = 1;
+    while (size < std::max(first.size(), second.size())) size <<= 1u;
+    size <<= 1u;
+    dftA.resize (size);
+    dftB.resize (size);
+
+    FastFourierTransform(dftA, false), FastFourierTransform(dftB, false);
+    for (int i = 0; i < size; ++i)
+        dftA[i] = dftA[i] * dftB[i];
+    FastFourierTransform(dftA, true);
+
+    result.resize (size);
+
+    int carry = 0, whole;
+    for (int i = size - 1; i >= 0; --i) {
+        whole = (int)floor(dftA[i].real() + 0.5) + carry;
+        carry = whole / 10;
+        whole = whole % 10;
+        result[i] = '0' + whole;
     }
 
-    return Add(templateMults);
+    result = result.substr(0, first.size() + second.size() - 1);
+    if (carry != 0)
+        result = std::to_string(carry) + result;
+
+    return result;
 }
 
 std::pair<std::string,std::string> SymbolArithmetic::Detail::SymbolOperation::Div(const std::string &first, const std::string &second) {

@@ -4,13 +4,20 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <complex>
 #include "StringOperation.h"
 
+/// @brief Символьная арифметика
+/// @note Только для целых беззнаковых чисел
 namespace SymbolArithmetic {
     namespace Detail {
         class SymbolOperation {
         private:
             static std::string Add(const std::vector<std::string> &numbers);
+            /// @brief Метод быстрого преобразования Фурье
+            /// @param coefficients Вектор коэффициентов. В нем же будет содержаться результат
+            /// @param invert Указывает на то прямое или обратное дискретное преобразование Фурье следует вычислить
+            static void FastFourierTransform(std::vector<std::complex<double>> & coefficients, bool invert);
         public:
             /// @brief Сложение n целых чисел
             /// @param numbers список целых чисел в строковом представлении

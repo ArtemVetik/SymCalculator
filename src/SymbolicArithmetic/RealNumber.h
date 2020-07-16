@@ -19,6 +19,7 @@ namespace SymbolArithmetic {
         void SplitNumber(const std::string &number);
     public:
         explicit RealNumber(const std::string& number);
+        RealNumber(const Sign &sign, const std::string &wholePart, const std::string &fractionalPart);
 
         std::string ToString();
         friend std::ostream& operator<< (std::ostream &out, const RealNumber &number);
